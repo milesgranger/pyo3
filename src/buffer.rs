@@ -68,7 +68,10 @@ pub enum ElementType {
         bytes: usize,
     },
     /// A boolean type.
-    Bool,
+    Bool {
+        /// The width of the bool in bytes.
+        bytes: usize,
+    },
     /// A float type.
     Float {
         /// The width of the float in bytes.
@@ -104,7 +107,7 @@ fn native_element_type_from_type_char(type_char: u8) -> ElementType {
         b'B' => UnsignedInteger {
             bytes: mem::size_of::<raw::c_uchar>(),
         },
-        b'?' => Bool,
+        b'?' => Bool { bytes: 1 },
         b'h' => SignedInteger {
             bytes: mem::size_of::<raw::c_short>(),
         },
@@ -147,7 +150,7 @@ fn standard_element_type_from_type_char(type_char: u8) -> ElementType {
     match type_char {
         b'c' | b'B' => UnsignedInteger { bytes: 1 },
         b'b' => SignedInteger { bytes: 1 },
-        b'?' => Bool,
+        b'?' => Bool { bytes: 1 },
         b'h' => SignedInteger { bytes: 2 },
         b'H' => UnsignedInteger { bytes: 2 },
         b'i' | b'l' => SignedInteger { bytes: 4 },
@@ -681,6 +684,7 @@ impl_element!(i64, SignedInteger);
 impl_element!(isize, SignedInteger);
 impl_element!(f32, Float);
 impl_element!(f64, Float);
+impl_element!(bool, Bool);
 
 #[cfg(test)]
 mod tests {
@@ -747,7 +751,7 @@ mod tests {
                     bytes: size_of::<raw::c_uchar>(),
                 },
             ),
-            (ffi::c_str!("@?"), Bool),
+            (ffi::c_str!("@?"), Bool { bytes: 1 }),
             (
                 ffi::c_str!("@h"),
                 SignedInteger {
@@ -816,7 +820,7 @@ mod tests {
             (ffi::c_str!("=b"), SignedInteger { bytes: 1 }),
             (ffi::c_str!("=c"), UnsignedInteger { bytes: 1 }),
             (ffi::c_str!("=B"), UnsignedInteger { bytes: 1 }),
-            (ffi::c_str!("=?"), Bool),
+            (ffi::c_str!("=?"), Bool { bytes: 1 }),
             (ffi::c_str!("=h"), SignedInteger { bytes: 2 }),
             (ffi::c_str!("=H"), UnsignedInteger { bytes: 2 }),
             (ffi::c_str!("=l"), SignedInteger { bytes: 4 }),
